@@ -227,16 +227,3 @@ INSERT INTO peopleroles (people_id, role_id) VALUES
   (10, 2),  
   (10, 1)
 ;
-
-
-select * from peopleroles;
-
-
-
-select 
-    *
-from 
-    roles
-    left join peopleroles on (roles.id=peopleroles.role_id)
-where 
-    peopleroles.people_id is NUll;
