@@ -25,18 +25,19 @@
         sqlalchemy
         pymysql
 
-	# Python Enviroment
-	flake8
-	black
+        # Python Enviroment
+        flake8
+        black
       ]);
   in {
     devShells.${system}.default = pkgs.mkShell {
       buildInputs = [
         pythonEnv
         pkgs.mysql
+        pkgs.sqls
 
-	# python lsp
-	pkgs.nodePackages.pyright
+        # python lsp
+        pkgs.nodePackages.pyright
       ];
       shellHook = ''
         # Exports the sql server url to enviroments variable to be used by vim dbui
