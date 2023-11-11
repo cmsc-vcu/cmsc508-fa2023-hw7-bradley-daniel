@@ -1,6 +1,6 @@
 ---
 title: Homework 7 - Creating a resume database
-author: (your name goes here!)
+author: Bradley Daniel
 date: last-modified
 format:
     html:
@@ -14,7 +14,7 @@ format:
 
 (Please clean up any comments that I included.  This is a scaffold document.)
 
-GITHUB URL:  <your URL goes here!>
+GITHUB URL:  <https://github.com/cmsc-vcu/cmsc508-fa2023-hw7-bradley-daniel>
 
 ```{python}
 #| eval: true
@@ -25,8 +25,9 @@ import pandas as pd
 from tabulate import tabulate
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
-from sqlalchemy.exc import OperationalError, ProgrammingError
-from IPython.display import display, Markdown
+from sqlalchemy.exc import NoSuchModuleError, OperationalError, ProgrammingError, ArgumentError
+from IPython.display import display
+from IPython.core.display import Markdown
 ```
 ```{python}
 #| eval: true
@@ -63,14 +64,13 @@ engine_uri = f"mysql+pymysql://{config['user']}:{config['password']}@{config['ho
 try:
     cnx = create_engine(engine_uri)
 except ArgumentError as e:
+    if e == NoSuchModuleError:
+        print(f"create_engine: No Such Module Error: {e}")
     print(f"create_engine: Argument Error: {e}")
-    #sys.exit(1)
-except NoSuchModuleError as e:
-    print(f"create_engine: No Such Module Error: {e}")
-    #sys.exit(1)
+    sys.exit(1)
 except Exception as e:
     print(f"create_engine: An error occurred: {e}")
-    #sys.exit(1)
+    sys.exit(1)
 ```
 ```{python}
 #| echo: false
@@ -195,35 +195,191 @@ except Exception as e:
     print(f"An error occurred:\n\n{message}\n\nIgnoring and moving on.")
     df = pd.DataFrame()
 df
+```
+
+```{python}
+#| echo: false
+#| eval: true
+def query_database(sql):
+    try:
+        df = pd.read_sql(sql,cnx)
+    except Exception as e:
+        message = str(e)
+        print(f"An error occurred:\n\n{message}\n\nIgnoring and moving on.")
+        df = pd.DataFrame()
+    return df
+
 
 ```
 
 
 ### List people names and email addresses ordered by last_name
 
+```{python}
+sql = f"""
+select first_name, last_name from people ORDER BY last_name
+"""
+```
+
+```{python}
+#| echo: false
+#| eval: true
+query_database(sql)
+
+```
+
 
 ### List skill names of Person 1
 
+```{python}
+sql = f"""
+select 
+    skills.name 'person_1_skills_names' 
+from 
+    people
+    inner join peopleskills on (people.id=peopleskills.people_id)
+    inner join skills on (peopleskills.skills_id=skills.id)
+where 
+    people.last_name='Person 1';
+"""
+```
+
+```{python}
+#| echo: false
+#| eval: true
+query_database(sql)
+```
+
+
 
 ### List people names with Skill 6
+```{python}
+sql = f"""
+select 
+    first_name, last_name
+from 
+    people
+    inner join peopleskills on (people.id=peopleskills.people_id)
+    inner join skills on (peopleskills.skills_id=skills.id)
+where 
+    skills.tag='Skill_6';
+"""
+```
 
+```{python}
+#| echo: false
+#| eval: true
+query_database(sql)
+```
 
 ### List people with a DEVELOPER role
 
+```{python}
+sql = f"""
+select 
+    first_name, last_name
+from 
+    people
+    inner join peopleroles on (people.id=peopleroles.people_id)
+    inner join roles on (peopleroles.role_id=roles.id)
+where 
+    roles.name='Developer'
+"""
+```
+
+```{python}
+#| echo: false
+#| eval: true
+query_database(sql)
+```
 
 ### List names and email addresses of people without skills
+
+```{python}
+sql = f"""
+select 
+    first_name, last_name, email
+from 
+    people
+    left join peopleskills on (people.id=peopleskills.people_id)
+where 
+    peopleskills.skills_id is NULL;
+"""
+```
+
+```{python}
+#| echo: false
+#| eval: true
+query_database(sql)
+```
 
 
 ### List names and tags of unused skills
 
+```{python}
+sql = f"""
+select 
+    skills.name, skills.tag
+from 
+    skills
+    left join peopleskills on (skills.id=peopleskills.skills_id)
+where 
+    peopleskills.people_id is NULL;
+"""
+```
+
+```{python}
+#| echo: false
+#| eval: true
+query_database(sql)
+```
 
 ### List people names and skill names with the BOSS role
 
+```{python}
+sql = f"""
+# select first_name, last_name from people ORDER BY last_name
+select 
+    people.first_name, people.last_name, skills.name skill_name
+from 
+    people
+    inner join peopleroles on (people.id=peopleroles.people_id)
+    inner join roles on (peopleroles.role_id=roles.id)
+    inner join peopleskills on (people.id=peopleskills.people_id)
+    inner join skills on (peopleskills.skills_id=skills.id)
+where 
+    roles.name="Boss";
+"""
+```
+
+```{python}
+#| echo: false
+#| eval: true
+query_database(sql)
+```
+
 
 ### List ids and names of unused roles
+
+```{python}
+sql = f"""
+select 
+    roles.id, roles.name
+from 
+    roles
+    left join peopleroles on (roles.id=peopleroles.role_id)
+where 
+    peopleroles.people_id is NUll;
+"""
+```
+
+```{python}
+#| echo: false
+#| eval: true
+query_database(sql)
+```
 
 
 ## Reflection
 
 (Write a paragraph expressing your thoughts, feelings, and insights about your experience with this assignment.  Pause and breath before writing - I'm trying to encourage critical thinking and self-awareness while allowing you to explore the connections between theory and practice. And yes, delete this paragraph.)
-
