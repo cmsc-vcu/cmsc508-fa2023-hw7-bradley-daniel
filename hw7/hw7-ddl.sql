@@ -176,8 +176,7 @@ VALUES
   (3, 'Recruit', 30),
   (4, 'Team Lead', 40),
   (5, 'Boss', 50),
-  (6, 'Mentor', 60),
-  (7, 'Intern', 70);
+  (6, 'Mentor', 60);
 
 
 
