@@ -1,5 +1,5 @@
 {
-  description = "Python enviroment";
+  description = "Homework 7 dev enviroment";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -25,19 +25,20 @@
         sqlalchemy
         pymysql
 
-        # Python Enviroment
+        # Python Dev pkgs
         flake8
         black
       ]);
   in {
     devShells.${system}.default = pkgs.mkShell {
-      buildInputs = [
+      buildInputs = with pkgs; [
         pythonEnv
-        pkgs.mysql
-        pkgs.sqls
 
+        # Sql Packages
+        mysql
+        sqls
         # python lsp
-        pkgs.nodePackages.pyright
+        nodePackages.pyright
       ];
       shellHook = ''
         # Exports the sql server url to enviroments variable to be used by vim dbui
